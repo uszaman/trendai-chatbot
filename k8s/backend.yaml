@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: chatbot
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata:
+      labels: { app: backend }
+    spec:
+      containers:
+        - name: backend
+          image: REGISTRY/chatbot-backend:latest   # replace REGISTRY
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MONGO_URI
+              valueFrom: { secretKeyRef: { name: mongo-secret, key: uri } }
+            - name: ANTHROPIC_API_KEY
+              valueFrom: { secretKeyRef: { name: llm-secret, key: api-key } }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "512Mi" }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: chatbot
+spec:
+  selector: { app: backend }
+  ports:
+    - port: 8000
+      targetPort: 8000

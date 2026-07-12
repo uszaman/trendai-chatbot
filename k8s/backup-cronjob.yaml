@@ -1,0 +1,35 @@
+# Runs mongodump every 24h and uploads the archive to S3.
+# Requires IAM: the node/pod role needs s3:PutObject on the backup bucket only.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-backup
+  namespace: chatbot
+spec:
+  schedule: "0 2 * * *"          # 02:00 UTC daily
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: amazon/aws-cli:2.17.0
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -e
+                  apk add --no-cache mongodb-tools 2>/dev/null || \
+                    (curl -s https://fastdl.mongodb.org/tools/db/mongodb-database-tools-amazon2-x86_64-100.9.4.tgz | tar xz -C /tmp && export PATH=$PATH:/tmp/mongodb-database-tools-*/bin)
+                  STAMP=$(date +%Y-%m-%d-%H%M%S)
+                  mongodump --uri="$MONGO_URI" --archive=/tmp/dump-$STAMP.gz --gzip
+                  aws s3 cp /tmp/dump-$STAMP.gz s3://$BACKUP_BUCKET/mongodb/dump-$STAMP.gz
+                  echo "Backup uploaded: dump-$STAMP.gz"
+              env:
+                - name: MONGO_URI
+                  valueFrom: { secretKeyRef: { name: mongo-secret, key: uri } }
+                - name: BACKUP_BUCKET
+                  value: "trendai-chatbot-backups-uzuz"   # replace with your bucket

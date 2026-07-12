@@ -1,0 +1,15 @@
+# Secrets
+*.env
+kubeconfig
+k8s/secrets.yaml
+
+# Terraform
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Python
+__pycache__/
+*.pyc
+.venv/
