@@ -34,6 +34,7 @@ spec:
             limits: { cpu: "500m", memory: "512Mi" }
           securityContext:
             runAsNonRoot: true
+            runAsUser: 10001
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
 ---

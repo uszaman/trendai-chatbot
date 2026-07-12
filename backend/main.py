@@ -72,7 +72,11 @@ async def call_llm(message: str) -> str:
             headers=headers,
             json=payload,
         )
-        r.raise_for_status()
+        #r.raise_for_status()
+        if r.status_code =/=200:
+                 log.error("Anthropic API error %s: %s", r.status_code, r.text)
+            r.raise_for_status()
+        
         data = r.json()
         return "".join(
             block["text"] for block in data.get("content", [])
