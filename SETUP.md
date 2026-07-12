@@ -156,6 +156,9 @@ To https://github.com/uszaman/trendai-chatbot.git
  ! [remote rejected] main -> main (push declined due to repository rule violations)
 error: failed to push some refs to 'https://github.com/uszaman/trendai-chatbot.git'
 
+
+Worth noting: terraform.tfstate contains your MongoDB password and other secrets in plaintext. Getting it out of the repo isn’t just about file size — it’s exactly the kind of thing Gitleaks exists to catch. If it had gone up, that’s a real finding against you in a security interview.
+
 ## 4. Build & push images
 ```bash
 # Using GitHub Container Registry (ghcr.io)

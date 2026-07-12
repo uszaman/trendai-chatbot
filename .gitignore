@@ -2,6 +2,7 @@
 *.env
 kubeconfig
 k8s/secrets.yaml
+*.pem
 
 # Terraform
 terraform/.terraform/
