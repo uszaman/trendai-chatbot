@@ -73,7 +73,7 @@ async def call_llm(message: str) -> str:
             json=payload,
         )
         #r.raise_for_status()
-        if r.status_code =/=200:
+        if r.status_code != 200:
                  log.error("Anthropic API error %s: %s", r.status_code, r.text)
             r.raise_for_status()
         
