@@ -66,6 +66,8 @@ spec:
     - from:
         - podSelector:
             matchLabels: { app: backend }
+        - podSelector:
+            matchLabels: { app: backup }
       ports:
         - protocol: TCP
           port: 27017

@@ -13,17 +13,19 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            app: backup
         spec:
           restartPolicy: OnFailure
           containers:
             - name: backup
-              image: amazon/aws-cli:2.17.0
-              command: ["/bin/sh", "-c"]
+              image: mongo:7.0
+              command: ["/bin/bash", "-c"]
               args:
                 - |
                   set -e
-                  apk add --no-cache mongodb-tools 2>/dev/null || \
-                    (curl -s https://fastdl.mongodb.org/tools/db/mongodb-database-tools-amazon2-x86_64-100.9.4.tgz | tar xz -C /tmp && export PATH=$PATH:/tmp/mongodb-database-tools-*/bin)
+                  apt-get update -qq && apt-get install -y -qq awscli
                   STAMP=$(date +%Y-%m-%d-%H%M%S)
                   mongodump --uri="$MONGO_URI" --archive=/tmp/dump-$STAMP.gz --gzip
                   aws s3 cp /tmp/dump-$STAMP.gz s3://$BACKUP_BUCKET/mongodb/dump-$STAMP.gz
@@ -32,4 +34,4 @@ spec:
                 - name: MONGO_URI
                   valueFrom: { secretKeyRef: { name: mongo-secret, key: uri } }
                 - name: BACKUP_BUCKET
-                  value: "trendai-chatbot-backups-uzuz"   # replace with your bucket
+                  value: "trendai-chatbot-backups-uzuz"
