@@ -45,6 +45,15 @@ jobs:
           severity: CRITICAL,HIGH
           exit-code: "0"          # set to 1 to block on findings
           format: table
+  # ---------- Adding SAST scan
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install bandit
+      - run: bandit -r backend/ -f txt || true
 
   # ---------- Build & deploy (runs only after scans pass) ----------
   build-deploy:
