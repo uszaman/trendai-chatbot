@@ -54,6 +54,18 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install bandit
       - run: bandit -r backend/ -f txt || true
+      
+  # ---------- Adding bheckov ias-scan
+  iac-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          quiet: true
+          soft_fail: true
 
   # ---------- Build & deploy (runs only after scans pass) ----------
   build-deploy:
